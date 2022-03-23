@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import List, Dict
 
 import discord
@@ -7,65 +6,12 @@ from discord.abc import PrivateChannel, GuildChannel
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
-from src import allowed_guilds
-from src.decorators import direct_message
-
-message_config = {
-    'you_are_not_in_event': 'Для того чтоб участвовать в ивенте необходимо войти в комнату {channel}',
-    'you_are_already_in_queue': 'Вы уже участвуете в караоке. Ваш номер в очереди {index}',
-    'you_are_not_in_queue': 'Вы не находитесь в очереди',
-    'you_are_added_in_queue_with_number': 'Вы добавлены в очередь. Ваш номер в очереди {index}',
-    'list_item': '{index} - {user}{comment}',
-    'list_item_comment': ' - {comment}',
-    'list_delimiter': '\n',
-    'queue_is_empty_for_user': 'Очередь пуста. Вы можете быть первым!',
-    'queue_is_empty_for_guild': 'Очередь пока пуста!',
-    'current_artist': 'Для вас выступает {user}{comment}',
-    'next_artist': 'Следующий {user}{comment}',
-    'artist_comment': ' - {comment}',
-    'user_not_in_queue': 'Пользователь не находится в очереди',
-    'user_remove_from_queue': 'Пользователь {user} был удалён из очереди{comment}.',
-    'user_remove_from_queue_comment': ' по причине {comment}',
-    'event_has_been_stopped': 'Ивент был остановлен',
-    'event_has_been_started': 'Ивент запущен',
-    'log_empty': 'История караоке пуста',
-}
-
-command_config = {
-    'append': 'append',
-    'log': 'log',
-    'list': 'list',
-    'dm_list': 'dm_list',
-    'pop': 'pop',
-    'remove': 'remove',
-    'stop': 'stop',
-    'start': 'start',
-    'cancel': 'cancel',
-}
+from .decorators import direct_message, allowed_guilds
+from .karaoke_bot_config import KaraokeBotConfig
+from .karaoke_log import KaraokeLog
 
 
-@dataclass
-class KaraokeBotConfig:
-    guild_id: int
-    command_prefix: str = '?'
-    text_channel_name: str = '🎉-ивент-караоке'
-    text_channel_id: int = None
-    voice_channel_name: str = '🎉 Ивент "Караоке"'
-    voice_channel_id: int = None
-    category_name: str = '---- • ИГРАЕМ 🎉'
-    admin_role_name: str = 'karaoke-admin'
-    admin_role_id: int = None
-    member_role_name: str = 'karaoke-member'
-    member_role_id: int = None
-
-
-@dataclass
-class KaraokeLog:
-    user: User
-    comment: str = None
-
-
-class Karaoke:
+class KaraokeBot:
     def __init__(self, config: KaraokeBotConfig):
         self.config = config
         self.bot: Bot = None
@@ -101,16 +47,16 @@ class Karaoke:
         # TODO Добавить коммент
 
     def get_list_user_description(self, index: int, user: User, comment: str = None) -> str:
-        return message_config['list_item'].format(index=index, user=user.mention,
-                                                  comment=message_config['list_item_comment'].format(
-                                                      comment=comment) if comment else '')
+        return self.config.responses['list_item'].format(index=index, user=user.mention,
+                                                         comment=self.config.responses['list_item_comment'].format(
+                                                             comment=comment) if comment else '')
 
     def get_log(self) -> str:
-        return message_config['list_delimiter'].join(
+        return self.config.responses['list_delimiter'].join(
             [self.get_list_user_description(index + 1, log.user, log.comment) for index, log in enumerate(self.log)])
 
     def get_queue_list(self) -> str:
-        return message_config['list_delimiter'].join(
+        return self.config.responses['list_delimiter'].join(
             [self.get_list_user_description(index + 1, user, self.user_songs.get(
                 user.id)) for index, user in enumerate(self.queue)])
 
@@ -167,41 +113,41 @@ class Karaoke:
         async def on_voice_state_update(member: Member, before: VoiceState, after: VoiceState):
             await self.apply_roles(member, before, after)
 
-        @self.bot.command(name=command_config['append'])
+        @self.bot.command(name=self.config.commands['append'])
         @direct_message()
         async def queue_append(ctx: Context, comment: str = None):
             send = ctx.channel.send
             author = ctx.message.author
 
             if not self.is_user_in_event(author):
-                await send(message_config['you_are_not_in_event'].format(channel=self.voice_channel.mention))
+                await send(self.config.responses['you_are_not_in_event'].format(channel=self.voice_channel.mention))
             elif author in self.queue:
-                await send(message_config['you_are_already_in_queue'].format(index=self.index_in_queue(author)))
+                await send(self.config.responses['you_are_already_in_queue'].format(index=self.index_in_queue(author)))
             else:
                 await send(
-                    message_config['you_are_added_in_queue_with_number'].format(
+                    self.config.responses['you_are_added_in_queue_with_number'].format(
                         index=self.add_to_queue(author, comment)))
 
-        @self.bot.command(name=command_config['log'])
+        @self.bot.command(name=self.config.commands['log'])
         @commands.has_role(self.config.admin_role_name)
         @allowed_guilds([self.config.guild_id])
         async def event_log(ctx: Context):
             await ctx.message.delete()
-            await ctx.channel.send(self.get_log() or message_config['log_empty'])
+            await ctx.channel.send(self.get_log() or self.config.responses['log_empty'])
 
-        @self.bot.command(name=command_config['list'])
+        @self.bot.command(name=self.config.commands['list'])
         @commands.has_role(self.config.admin_role_name)
         @allowed_guilds([self.config.guild_id])
         async def queue_guild_list(ctx: Context):
             await ctx.message.delete()
-            await ctx.channel.send(self.get_queue_list() or message_config['queue_is_empty_for_guild'])
+            await ctx.channel.send(self.get_queue_list() or self.config.responses['queue_is_empty_for_guild'])
 
-        @self.bot.command(name=command_config['dm_list'])
+        @self.bot.command(name=self.config.commands['dm_list'])
         @direct_message()
         async def queue_user_list(ctx: Context):
-            await ctx.channel.send(self.get_queue_list() or message_config['queue_is_empty_for_user'])
+            await ctx.channel.send(self.get_queue_list() or self.config.responses['queue_is_empty_for_user'])
 
-        @self.bot.command(name=command_config['pop'])
+        @self.bot.command(name=self.config.commands['pop'])
         @commands.has_role(self.config.admin_role_name)
         @allowed_guilds([self.config.guild_id])
         async def queue_pop(ctx: Context):
@@ -209,21 +155,21 @@ class Karaoke:
 
             if self.queue:
                 user, comment = self.pop_from_queue()
-                await ctx.channel.send(message_config['current_artist'].format(user=user.mention,
-                                                                               comment=message_config[
-                                                                                   'artist_comment'].format(
-                                                                                   comment=comment) if comment else ''))
+                await ctx.channel.send(self.config.responses['current_artist'].format(user=user.mention,
+                                                                                      comment=self.config.responses[
+                                                                                          'artist_comment'].format(
+                                                                                          comment=comment) if comment else ''))
 
                 if self.queue:
                     next_user, next_comment = self.get_zero_from_queue()
-                    await ctx.channel.send(message_config['next_artist'].format(user=next_user.mention,
-                                                                                comment=message_config[
-                                                                                    'artist_comment'].format(
-                                                                                    comment=next_comment) if next_comment else ''))
+                    await ctx.channel.send(self.config.responses['next_artist'].format(user=next_user.mention,
+                                                                                       comment=self.config.responses[
+                                                                                           'artist_comment'].format(
+                                                                                           comment=next_comment) if next_comment else ''))
             else:
-                await ctx.channel.send(message_config['queue_is_empty_for_guild'])
+                await ctx.channel.send(self.config.responses['queue_is_empty_for_guild'])
 
-        @self.bot.command(name=command_config['remove'])
+        @self.bot.command(name=self.config.commands['remove'])
         @commands.has_role(self.config.admin_role_name)
         @allowed_guilds([self.config.guild_id])
         async def queue_exclude(ctx: Context, member: discord.Member, comment: str = None):
@@ -232,28 +178,30 @@ class Karaoke:
 
             if user in self.queue:
                 self.remove_from_queue(user, comment)
-                await ctx.channel.send(message_config['user_remove_from_queue'].format(user=user.mention,
-                                                                                       comment=message_config[
-                                                                                           'user_remove_from_queue_comment'].format(
-                                                                                           comment=comment) if comment else ''))
+                await ctx.channel.send(self.config.responses['user_remove_from_queue'].format(user=user.mention,
+                                                                                              comment=
+                                                                                              self.config.responses[
+                                                                                                  'user_remove_from_queue_comment'].format(
+                                                                                                  comment=comment) if comment else ''))
             else:
-                await ctx.channel.send(message_config['user_not_in_queue'])
+                await ctx.channel.send(self.config.responses['user_not_in_queue'])
 
-        @self.bot.command(name=command_config['cancel'])
+        @self.bot.command(name=self.config.commands['cancel'])
         @direct_message()
         async def queue_append(ctx: Context, comment: str = None):
             author = ctx.message.author
 
             if author in self.queue:
                 self.remove_from_queue(author, comment)
-                await ctx.channel.send(message_config['user_remove_from_queue'].format(user=author.mention,
-                                                                                       comment=message_config[
-                                                                                           'user_remove_from_queue_comment'].format(
-                                                                                           comment=comment) if comment else ''))
+                await ctx.channel.send(self.config.responses['user_remove_from_queue'].format(user=author.mention,
+                                                                                              comment=
+                                                                                              self.config.responses[
+                                                                                                  'user_remove_from_queue_comment'].format(
+                                                                                                  comment=comment) if comment else ''))
             else:
-                await ctx.channel.send(message_config['you_are_not_in_queue'])
+                await ctx.channel.send(self.config.responses['you_are_not_in_queue'])
 
-        @self.bot.command(name=command_config['stop'])
+        @self.bot.command(name=self.config.commands['stop'])
         @commands.has_role(self.config.admin_role_name)
         @allowed_guilds([self.config.guild_id])
         async def stop_karaoke(ctx: Context):
@@ -267,13 +215,13 @@ class Karaoke:
             if voice_channel:
                 await voice_channel.delete()
 
-            await ctx.channel.send(message_config['event_has_been_stopped'])
+            await ctx.channel.send(self.config.responses['event_has_been_stopped'])
 
             self.log.clear()
             self.queue.clear()
             self.user_songs.clear()
 
-        @self.bot.command(name=command_config['start'])
+        @self.bot.command(name=self.config.commands['start'])
         @commands.has_role(self.config.admin_role_name)
         @allowed_guilds([self.config.guild_id])
         async def start_karaoke(ctx: Context):
@@ -311,7 +259,7 @@ class Karaoke:
                                                                  })
             self.config.voice_channel_id = voice_channel.id
 
-            await ctx.channel.send(message_config['event_has_been_started'])
+            await ctx.channel.send(self.config.responses['event_has_been_started'])
 
     def run(self, token: str):
         self.bot = Bot(command_prefix=self.config.command_prefix)

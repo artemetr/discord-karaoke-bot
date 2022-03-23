@@ -1,0 +1,56 @@
+{
+  "guild": {
+    "id": 952993401836556379,
+    "category": {
+      "name": "---- • ИГРАЕМ 🎉",
+      "channels": {
+        "text": {
+          "name": "🎉-ивент-караоке"
+        },
+        "voice": {
+          "name": "🎉 Ивент \"Караоке\""
+        }
+      }
+    }
+  },
+  "roles": {
+    "admin": {
+      "name": "karaoke-admin"
+    },
+    "member": {
+      "name": "karaoke-member"
+    }
+  },
+  "command_prefix": "?",
+  "commands": {
+    "append": "append",
+    "log": "log",
+    "list": "list",
+    "dm_list": "dm_list",
+    "pop": "pop",
+    "remove": "remove",
+    "stop": "stop",
+    "start": "start",
+    "cancel": "cancel"
+  },
+  "responses": {
+    "you_are_not_in_event": "Для того чтоб участвовать в ивенте необходимо войти в комнату {channel}",
+    "you_are_already_in_queue": "Вы уже участвуете в караоке. Ваш номер в очереди {index}",
+    "you_are_not_in_queue": "Вы не находитесь в очереди",
+    "you_are_added_in_queue_with_number": "Вы добавлены в очередь. Ваш номер в очереди {index}",
+    "list_item": "{index} - {user}{comment}",
+    "list_item_comment": " - {comment}",
+    "list_delimiter": "\n",
+    "queue_is_empty_for_user": "Очередь пуста. Вы можете быть первым!",
+    "queue_is_empty_for_guild": "Очередь пока пуста!",
+    "current_artist": "Для вас выступает {user}{comment}",
+    "next_artist": "Следующий {user}{comment}",
+    "artist_comment": " - {comment}",
+    "user_not_in_queue": "Пользователь не находится в очереди",
+    "user_remove_from_queue": "Пользователь {user} был удалён из очереди{comment}.",
+    "user_remove_from_queue_comment": " по причине {comment}",
+    "event_has_been_stopped": "Ивент был остановлен",
+    "event_has_been_started": "Ивент запущен",
+    "log_empty": "История караоке пуста"
+  }
+}
