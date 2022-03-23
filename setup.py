@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='discord_karaoke',
-    version='0.0.3',
+    version='0.0.4',
     description='Discord karaoke bot',
     url='https://github.com/artemetr/discord-karaoke-bot',
     author='Артем Широких <@artemetr>',
