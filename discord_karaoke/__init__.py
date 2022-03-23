@@ -1,6 +1,10 @@
 from .src.karaoke_bot import KaraokeBot
 from .src.karaoke_bot_config import KaraokeBotConfig
 
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __author__ = 'Артем Широких <@artemetr>'
 __license__ = 'MIT'
+
+# For JetBrains IDE recognition
+KaraokeBot = KaraokeBot
+KaraokeBotConfig = KaraokeBotConfig

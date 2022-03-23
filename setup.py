@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
     name='discord_karaoke',
-    version='0.0.2',
-    description='Package for translating an excel file to python code',
+    version='0.0.3',
+    description='Discord karaoke bot',
     url='https://github.com/artemetr/discord-karaoke-bot',
     author='Артем Широких <@artemetr>',
     author_email='job@artemetr.ru',
