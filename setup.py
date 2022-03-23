@@ -1,13 +1,11 @@
 from setuptools import setup
 
-from discord_karaoke.__meta__ import __version__, __author__
-
 setup(
     name='discord_karaoke',
-    version=__version__,
+    version='0.0.2',
     description='Package for translating an excel file to python code',
     url='https://github.com/artemetr/discord-karaoke-bot',
-    author=__author__,
+    author='Артем Широких <@artemetr>',
     author_email='job@artemetr.ru',
     license='MIT',
     packages=['discord_karaoke'],
