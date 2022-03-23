@@ -1,6 +1,6 @@
 from setuptools import setup
 
-from discord_karaoke import __version__, __author__
+from discord_karaoke.__meta__ import __version__, __author__
 
 setup(
     name='discord_karaoke',
