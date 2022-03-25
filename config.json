@@ -23,15 +23,15 @@
   },
   "command_prefix": "?",
   "commands": {
-    "append": "append",
-    "log": "log",
-    "list": "list",
-    "dm_list": "dm_list",
-    "pop": "pop",
-    "remove": "remove",
-    "stop": "stop",
-    "start": "start",
-    "cancel": "cancel"
+    "add_me_to_queue": "append",
+    "remove_me_from_queue": "cancel",
+    "show_log_of_artists": "log",
+    "show_queue_of_artists": "list",
+    "start_performance": "start",
+    "skip_performance": "skip",
+    "finish_performance": "finish",
+    "stop": "stop_karaoke",
+    "start": "start_karaoke"
   },
   "responses": {
     "you_are_not_in_event": "Для того чтоб участвовать в ивенте необходимо войти в комнату {channel}",
@@ -47,10 +47,19 @@
     "next_artist": "Следующий {user}{comment}",
     "artist_comment": " - {comment}",
     "user_not_in_queue": "Пользователь не находится в очереди",
-    "user_remove_from_queue": "Пользователь {user} был удалён из очереди{comment}.",
-    "user_remove_from_queue_comment": " по причине {comment}",
     "event_has_been_stopped": "Ивент был остановлен",
     "event_has_been_started": "Ивент запущен",
-    "log_empty": "История караоке пуста"
+    "log_empty": "История караоке пуста",
+    "start_artist_performance": "Для вас выступает {user}{comment}",
+    "your_performance_starts_now": "Сейчас ваше выступление",
+    "skip_artist_performance": "Выступление {user} отменено{comment}",
+    "your_performance_is_skipped": "Ваше выступление будет пропущено{comment}",
+    "skip_artist_performance_comment": " по причине {comment}",
+    "next_artist_performance": "Следующим выступает {user}{comment}",
+    "next_performance_is_yours": "Следующее выступление ваше",
+    "finish_artist_performance": "Для вас выступал {user}{comment}",
+    "your_performance_is_finished": "Ваше выступление окончено, вы большой молодец",
+    "be_ready_artist_performance": "Приготовиться {user}{comment}",
+    "you_have_to_be_ready_to_perform": "Приготовься, твоё выступление вот вот начнётся"
   }
 }
